@@ -1,0 +1,98 @@
+---
+title: "Machine Learnnig"
+author: "vijay Kumar Dubey"
+date: "Monday, October 27, 2014"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+
+
+testdata<-read.csv(file.choose(),head=TRUE,stringsAsFactors=TRUE)
+str(testdata)
+```
+
+```{r}
+# Converting non numeric variable to numeric
+
+testdata$num_window <- as.numeric(testdata$num_window)
+
+testdata$total_accel_belt <- as.numeric(testdata$total_accel_belt)
+
+testdata$total_accel_arm <- as.numeric(testdata$total_accel_arm)
+
+testdata$total_accel_dumbbell <- as.numeric(testdata$total_accel_dumbbell)
+
+testdata$total_accel_forearm <- as.numeric(testdata$total_accel_forearm)
+
+testdata$problem_id <- as.numeric(testdata$problem_id)
+
+```
+
+
+#Training dataset preparation
+
+```{r}
+WL<-read.csv(file.choose(),head=TRUE, na.strings=c("NA", "#DIV/0!"), stringsAsFactors=TRUE)
+
+names(WL)
+
+str(WL)
+
+WL$num_window <- as.numeric(WL$num_window)
+
+WL$total_accel_belt <- as.numeric(WL$total_accel_belt)
+
+WL$total_accel_arm <- as.numeric(WL$total_accel_arm)
+
+WL$total_accel_dumbbell <- as.numeric(WL$total_accel_dumbbell)
+
+WL$total_accel_forearm <- as.numeric(WL$total_accel_forearm)
+
+```
+
+```{r}
+ 
+library(caret)
+
+```
+
+
+#Further Splitting the "training dataset" into training dataset and testing dataset to perform CROSS VALIDATION
+```{r}
+intrainCV <- createDataPartition(y=WL$classe, p=0.7, list = FALSE)
+
+trainingCV <- WL[intrainCV,]
+
+testingCV  <- WL[-intrainCV,]
+
+dim(trainingCV); dim(testingCV)
+
+```
+
+
+#Training model using training dataset
+```{r}
+trainmodlda<-train(classe~.,data = trainingCV,preProcess=c("center","scale"), method = "lda")
+
+# Testing model ussing the test dataset which was created after partitioning the training dataset
+
+```{r}
+plda <- predict(trainmodlda,testingCV)
+```
+
+# Validation Predicting the outcome using the algorithim on the testing dataset
+
+```{r}
+testplda <- predict(trainmodlda,testdata)
+
+```
+
+# Confusion matrix to test the out of sample error for the dataset that I have created for cross validation
+```{r}
+confusionMatrix(testingCV$classe, plda)
+```
